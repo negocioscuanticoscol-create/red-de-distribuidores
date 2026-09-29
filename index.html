@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<title>Integra Supply · Distribuidores ya trabajados</title>
+<title>Integra Supply · Red de Distribuidores</title>
 <link rel="icon" href="logo.jpg">
 <style>
   :root{
@@ -24,8 +24,36 @@
   header img{width:42px;height:42px;border-radius:8px;object-fit:cover;flex:none}
   header h1{margin:0;font-size:16px;color:var(--negro);font-weight:800;letter-spacing:-.01em}
   header p{margin:1px 0 0;font-size:11.5px;color:#3a2f00;font-weight:600}
+  header .salir{margin-left:auto;background:rgba(0,0,0,.15);border:none;color:var(--negro);font-weight:700;
+    font-size:12px;padding:8px 12px;border-radius:9px;cursor:pointer}
 
   main{max-width:1000px;margin:0 auto;padding:16px}
+
+  .campos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .campo{display:flex;flex-direction:column;gap:5px}
+  .campo label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--tenue);font-weight:700}
+  .campo input{padding:12px 13px;border-radius:11px;border:1px solid var(--linea);background:var(--carta);
+    color:var(--texto);font-size:14.5px;width:100%}
+  .campo input::placeholder{color:#6b6b6b}
+  .btnfila{display:flex;gap:8px;margin:4px 0 16px}
+  .btn{border:none;border-radius:11px;padding:12px 16px;font-size:14px;font-weight:700;cursor:pointer}
+  .btn.amarillo{background:var(--amarillo);color:var(--negro);flex:1}
+  .btn.gh{background:var(--carta2);color:var(--texto);border:1px solid var(--linea)}
+
+  .resumen{font-size:12px;color:var(--tenue);margin-bottom:14px;text-align:center}
+  .resumen b{color:var(--amarillo)}
+
+  .candado{background:var(--carta);border:1px dashed var(--linea);border-radius:14px;padding:16px;
+    text-align:center;margin:20px 0;font-size:13px;color:var(--tenue)}
+  .candado button{margin-top:10px}
+
+  .loginwrap{max-width:340px;margin:60px auto;background:var(--carta);border:1px solid var(--linea);
+    border-radius:16px;padding:22px}
+  .loginwrap h3{margin:0 0 4px;font-size:16px}
+  .loginwrap p{margin:0 0 16px;font-size:12.5px;color:var(--tenue)}
+  .loginwrap input{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--linea);
+    background:var(--carta2);color:var(--texto);font-size:14.5px;margin-bottom:10px}
+  .loginerr{color:var(--rojo);font-size:12.5px;margin:-4px 0 10px;display:none}
 
   .buscador{position:relative;margin-bottom:16px}
   .buscador input{width:100%;padding:13px 14px 13px 42px;border-radius:12px;border:1px solid var(--linea);
@@ -34,9 +62,6 @@
   .buscador .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.6;pointer-events:none}
   .buscador .limpiar{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;
     color:var(--tenue);font-size:18px;cursor:pointer;padding:6px;display:none}
-
-  .resumen{font-size:12px;color:var(--tenue);margin-bottom:14px;text-align:center}
-  .resumen b{color:var(--amarillo)}
 
   .mapa-wrap{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:10px;margin-bottom:16px;overflow:hidden}
   svg#mapa{width:100%;height:auto;display:block}
@@ -74,11 +99,11 @@
     letter-spacing:.03em;text-transform:uppercase;margin-bottom:6px}
 
   .vacio-msg{text-align:center;color:var(--tenue);font-size:13.5px;padding:30px 10px}
-  .cargando{text-align:center;color:var(--tenue);font-size:13.5px;padding:40px 10px}
   footer{text-align:center;font-size:11px;color:#5a5a5a;padding:26px 10px 34px}
 
   @media(max-width:520px){
     header h1{font-size:14px}
+    .campos{grid-template-columns:1fr}
     .fila .nom{font-size:13.5px}
   }
 </style>
@@ -88,62 +113,158 @@
 <header>
   <img src="logo.jpg" alt="Integra Supply">
   <div>
-    <h1>Distribuidores ya trabajados</h1>
+    <h1>Red de Distribuidores</h1>
     <p>Integra Supply · consulta antes de contactar</p>
   </div>
+  <button class="salir" id="btnSalir" style="display:none" onclick="cerrarSesion()">🔒 Salir</button>
 </header>
 
-<main>
-  <div class="buscador">
-    <span class="ico">🔎</span>
-    <input id="buscar" type="text" placeholder="Buscar por nombre, NIT o celular…" oninput="onBuscar()">
-    <button class="limpiar" id="btnLimpiar" onclick="limpiarBusqueda()">✕</button>
+<main id="main">
+  <!-- ===== MODO CONSULTA (sin clave) ===== -->
+  <div id="vConsulta">
+    <div class="campos">
+      <div class="campo"><label>Nombre de la empresa</label><input id="q_nombre" placeholder="Ej: Dotaciones..." oninput="onBuscarConsulta()"></div>
+      <div class="campo"><label>NIT</label><input id="q_nit" placeholder="Ej: 900123456" oninput="onBuscarConsulta()"></div>
+      <div class="campo"><label>Ciudad</label><input id="q_ciudad" placeholder="Ej: Bogotá" oninput="onBuscarConsulta()"></div>
+      <div class="campo"><label>Celular</label><input id="q_cel" placeholder="Ej: 3101234567" oninput="onBuscarConsulta()"></div>
+    </div>
+    <div class="resumen" id="resumenConsulta">Cargando…</div>
+    <div id="resultadoConsulta"></div>
+
+    <div class="candado">
+      🔒 Este buscador solo confirma si un distribuidor ya es cliente.<br>
+      Para ver el mapa completo y todos los datos de contacto se necesita clave.
+      <div><button class="btn gh" onclick="mostrarLogin()">Entrar con clave</button></div>
+    </div>
   </div>
 
-  <div class="resumen" id="resumen">Cargando distribuidores…</div>
-
-  <div class="mapa-wrap">
-    <svg id="mapa" viewBox="0 0 500 500"></svg>
+  <!-- ===== LOGIN ===== -->
+  <div id="vLogin" style="display:none">
+    <div class="loginwrap">
+      <h3>Acceso completo</h3>
+      <p>Usuario y clave del equipo de Integra Supply.</p>
+      <input id="lg_usuario" placeholder="Usuario" autocomplete="username">
+      <input id="lg_clave" placeholder="Clave" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')intentarLogin()">
+      <div class="loginerr" id="lg_err">Usuario o clave incorrectos.</div>
+      <div class="btnfila">
+        <button class="btn gh" onclick="ocultarLogin()">Cancelar</button>
+        <button class="btn amarillo" onclick="intentarLogin()">Entrar</button>
+      </div>
+    </div>
   </div>
 
-  <div class="chips" id="chipsDeptos"></div>
-
-  <div id="resultado"></div>
+  <!-- ===== MODO COMPLETO (con clave) ===== -->
+  <div id="vCompleto" style="display:none">
+    <div class="buscador">
+      <span class="ico">🔎</span>
+      <input id="buscar" type="text" placeholder="Buscar por nombre, NIT o celular…" oninput="onBuscar()">
+      <button class="limpiar" id="btnLimpiar" onclick="limpiarBusqueda()">✕</button>
+    </div>
+    <div class="resumen" id="resumen"></div>
+    <div class="mapa-wrap"><svg id="mapa" viewBox="0 0 500 560"></svg></div>
+    <div class="chips" id="chipsDeptos"></div>
+    <div id="resultado"></div>
+  </div>
 
   <footer>Negocios Cuánticos · Integra Supply</footer>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script>
 const SB_URL = 'https://fnayedgvamxktxfvywwl.supabase.co';
 const SB_KEY = 'sb_publishable_NVTYNkJ0V6obLwgwjXza1g_3Ihp-xMv';
-
-let CLIENTES = [];        // fila cruda de la base
-let POR_DEPTO = {};       // { deptoNormalizado: { nombreLindo, ciudades: { ciudad: [clientes] } } }
-let DEPTO_ACTIVO = null;
-let CIUDAD_ACTIVA = null;
-
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s==null?'':s).replace(/'/g,"\\'"); }
 function normaliza(s){
   return (s||'').toString().normalize('NFKD').replace(/[̀-ͯ]/g,'')
     .toUpperCase().replace(/[^A-Z0-9 ]/g,'').trim();
 }
 
-// Equivalencias entre el nombre del geojson (mayusculas, sin tilde, raro en
-// Bogota y San Andres) y el nombre que usa nuestra base de datos.
-const EQUIV_DEPTO = {
-  'SANTAFE DE BOGOTA DC': 'BOGOTA DC',
-  'ARCHIPIELAGO DE SAN ANDRES PROVIDENCIA Y SANTA CATALINA': 'SAN ANDRES',
-};
-function claveDepto(nombreCrudo){
-  const n = normaliza(nombreCrudo);
-  return EQUIV_DEPTO[n] || n;
-}
+let CLIENTES = [];   // se carga una sola vez, sirve para las dos vistas
 
 async function cargarClientes(){
   const r = await fetch(SB_URL + '/rest/v1/feroz_clientes_activos?select=*&order=depto,ciudad,nombre', {
     headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
   });
   CLIENTES = await r.json();
+  $('resumenConsulta').innerHTML = 'Base de <b>'+CLIENTES.length.toLocaleString('es-CO')+'</b> distribuidores ya trabajados.';
+  if(sessionStorage.getItem('integra_sesion')) entrarModoCompleto(false);
+}
+
+/* ===================== MODO CONSULTA (publico) ===================== */
+let tConsulta=null;
+function onBuscarConsulta(){ clearTimeout(tConsulta); tConsulta=setTimeout(ejecutarConsulta,150); }
+
+function ejecutarConsulta(){
+  const nombre = normaliza($('q_nombre').value);
+  const nit = normaliza($('q_nit').value);
+  const ciudad = normaliza($('q_ciudad').value);
+  const cel = normaliza($('q_cel').value);
+  if(!nombre && !nit && !ciudad && !cel){ $('resultadoConsulta').innerHTML=''; return; }
+
+  const encontrados = CLIENTES.filter(c=>{
+    if(nombre && !normaliza(c.nombre).includes(nombre)) return false;
+    if(nit && !normaliza(c.nit).includes(nit)) return false;
+    if(ciudad && !normaliza(c.ciudad).includes(ciudad)) return false;
+    if(cel){
+      const t1=normaliza(c.tel1), t2=normaliza(c.tel2), t3=normaliza(c.fijo1);
+      if(!t1.includes(cel) && !t2.includes(cel) && !t3.includes(cel)) return false;
+    }
+    return true;
+  }).slice(0,30);
+
+  if(!encontrados.length){
+    $('resultadoConsulta').innerHTML = '<div class="vacio-msg">✅ No aparece como cliente ya trabajado.</div>';
+    return;
+  }
+  $('resultadoConsulta').innerHTML = '<div class="lista">' + encontrados.map(c=>`
+    <div class="fila">
+      <div class="etiqueta">🚫 No contactar · ya es cliente</div>
+      <div class="nom">${esc(c.nombre||'(sin nombre)')}</div>
+      <div class="det"><span><b>Ciudad</b> ${esc(c.ciudad||'—')}</span></div>
+    </div>`).join('') + '</div>';
+}
+
+/* ===================== LOGIN ===================== */
+function mostrarLogin(){ $('vConsulta').style.display='none'; $('vLogin').style.display='block'; $('lg_usuario').focus(); }
+function ocultarLogin(){ $('vLogin').style.display='none'; $('vConsulta').style.display='block'; $('lg_err').style.display='none'; }
+
+async function intentarLogin(){
+  const usuario = $('lg_usuario').value.trim();
+  const clave = $('lg_clave').value;
+  if(!usuario || !clave){ return; }
+  let ok = false;
+  try{
+    const r = await fetch(SB_URL + '/rest/v1/integra_usuarios?select=id&usuario=eq.'+encodeURIComponent(usuario)
+      + '&clave=eq.'+encodeURIComponent(clave) + '&activo=is.true', {
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
+    });
+    const filas = await r.json();
+    ok = Array.isArray(filas) && filas.length>0;
+  }catch(e){ ok=false; }
+
+  fetch(SB_URL + '/rest/v1/integra_accesos', { method:'POST',
+    headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type':'application/json', Prefer:'return=minimal' },
+    body: JSON.stringify({ usuario: usuario||'(vacio)', exitoso: ok }) }).catch(()=>{});
+
+  if(ok){
+    sessionStorage.setItem('integra_sesion', usuario);
+    entrarModoCompleto(true);
+  } else {
+    $('lg_err').style.display='block';
+  }
+}
+
+function cerrarSesion(){
+  sessionStorage.removeItem('integra_sesion');
+  location.reload();
+}
+
+/* ===================== MODO COMPLETO (con clave) ===================== */
+let POR_DEPTO = {}, DEPTO_ACTIVO=null, CIUDAD_ACTIVA=null, projection, path, d3cargado=false;
+
+async function entrarModoCompleto(animar){
+  $('vLogin').style.display='none'; $('vConsulta').style.display='none';
+  $('vCompleto').style.display='block'; $('btnSalir').style.display='block';
 
   POR_DEPTO = {};
   CLIENTES.forEach(c=>{
@@ -153,16 +274,33 @@ async function cargarClientes(){
     if(!POR_DEPTO[k].ciudades[ciu]) POR_DEPTO[k].ciudades[ciu] = [];
     POR_DEPTO[k].ciudades[ciu].push(c);
   });
-
   $('resumen').innerHTML = 'En total hay <b>'+CLIENTES.length.toLocaleString('es-CO')+'</b> distribuidores que ya trabajamos, en <b>'+Object.keys(POR_DEPTO).length+'</b> departamentos.';
   pintarChips();
+
+  if(!d3cargado){
+    await cargarScript('https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js');
+    d3cargado = true;
+  }
   await pintarMapa();
 }
 
-function $(id){ return document.getElementById(id); }
+function cargarScript(src){
+  return new Promise(resolve=>{
+    const s=document.createElement('script'); s.src=src; s.onload=resolve; document.body.appendChild(s);
+  });
+}
+
+const EQUIV_DEPTO = {
+  'SANTAFE DE BOGOTA DC': 'BOGOTA DC',
+  'ARCHIPIELAGO DE SAN ANDRES PROVIDENCIA Y SANTA CATALINA': 'SAN ANDRES',
+};
+function claveDepto(nombreCrudo){
+  const n = normaliza(nombreCrudo);
+  return EQUIV_DEPTO[n] || n;
+}
 
 function pintarChips(){
-  const orden = Object.keys(POR_DEPTO).sort((a,b)=>POR_DEPTO[b].ciudades && contarDepto(b)-contarDepto(a));
+  const orden = Object.keys(POR_DEPTO).sort((a,b)=>contarDepto(b)-contarDepto(a));
   $('chipsDeptos').innerHTML = orden.map(k=>{
     const d = POR_DEPTO[k];
     const n = contarDepto(k);
@@ -173,16 +311,12 @@ function contarDepto(k){
   const d = POR_DEPTO[k]; if(!d) return 0;
   return Object.values(d.ciudades).reduce((s,arr)=>s+arr.length,0);
 }
-function esc(s){ return String(s).replace(/'/g,"\\'"); }
 
-let projection, path;
 async function pintarMapa(){
   const geo = await (await fetch('colombia-departamentos.json')).json();
   projection = d3.geoMercator().fitSize([500,560], geo);
   path = d3.geoPath(projection);
-
   const svg = $('mapa');
-  svg.setAttribute('viewBox','0 0 500 560');
   svg.innerHTML = geo.features.map(f=>{
     const k = claveDepto(f.properties.nombre);
     const n = contarDepto(k);
@@ -190,7 +324,6 @@ async function pintarMapa(){
     return `<path data-k="${esc(k)}" class="${clase}" d="${path(f)}">`
       + `<title>${esc(f.properties.nombre)} · ${n} distribuidor(es)</title></path>`;
   }).join('');
-
   svg.querySelectorAll('path[data-k]').forEach(p=>{
     p.addEventListener('click', ()=>{ if(contarDepto(p.dataset.k)>0) elegirDepto(p.dataset.k); });
   });
@@ -222,11 +355,10 @@ function elegirCiudad(c){
 
 function pintarListaCiudad(){
   const d = POR_DEPTO[DEPTO_ACTIVO]; if(!d) return;
-  const arr = d.ciudades[CIUDAD_ACTIVA] || [];
-  $('listaCiudad').innerHTML = filaLista(arr);
+  $('listaCiudad').innerHTML = filaListaCompleta(d.ciudades[CIUDAD_ACTIVA] || []);
 }
 
-function filaLista(arr){
+function filaListaCompleta(arr){
   if(!arr.length) return '<div class="vacio-msg">No hay distribuidores aquí.</div>';
   return '<div class="lista">' + arr.map(c=>`
     <div class="fila">
@@ -243,35 +375,23 @@ function filaLista(arr){
 }
 
 let tBuscar=null;
-function onBuscar(){
-  clearTimeout(tBuscar);
-  tBuscar = setTimeout(ejecutarBusqueda, 120);
-}
-function limpiarBusqueda(){
-  $('buscar').value=''; ejecutarBusqueda();
-}
+function onBuscar(){ clearTimeout(tBuscar); tBuscar=setTimeout(ejecutarBusqueda,120); }
+function limpiarBusqueda(){ $('buscar').value=''; ejecutarBusqueda(); }
 const TOPE_BUSQUEDA = 60;
 function ejecutarBusqueda(){
   const q = normaliza($('buscar').value);
   $('btnLimpiar').style.display = q ? 'block' : 'none';
-  if(!q){
-    if(DEPTO_ACTIVO) pintarCiudades(); else $('resultado').innerHTML='';
-    return;
-  }
-  if(q.length < 3){
-    $('resultado').innerHTML = '<div class="vacio-msg">Escribe al menos 3 letras o números para buscar.</div>';
-    return;
-  }
+  if(!q){ if(DEPTO_ACTIVO) pintarCiudades(); else $('resultado').innerHTML=''; return; }
+  if(q.length < 3){ $('resultado').innerHTML = '<div class="vacio-msg">Escribe al menos 3 letras o números para buscar.</div>'; return; }
   const encontrados = CLIENTES.filter(c=>{
-    const nom = normaliza(c.nombre);
-    const nit = normaliza(c.nit);
+    const nom = normaliza(c.nombre), nit = normaliza(c.nit);
     const t1 = normaliza(c.tel1), t2 = normaliza(c.tel2), t3 = normaliza(c.fijo1);
     return nom.includes(q) || nit.includes(q) || t1.includes(q) || t2.includes(q) || t3.includes(q);
   });
   const recorte = encontrados.slice(0, TOPE_BUSQUEDA);
   const aviso = encontrados.length > TOPE_BUSQUEDA
     ? `<div class="vacio-msg">Mostrando los primeros ${TOPE_BUSQUEDA} de ${encontrados.length} — escribe algo más específico.</div>` : '';
-  $('resultado').innerHTML = `<h2>Resultados de la búsqueda (${encontrados.length})</h2>` + aviso + filaLista(recorte);
+  $('resultado').innerHTML = `<h2>Resultados de la búsqueda (${encontrados.length})</h2>` + aviso + filaListaCompleta(recorte);
 }
 
 cargarClientes();
