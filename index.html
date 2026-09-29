@@ -210,6 +210,13 @@ function ejecutarConsulta(){
     $('resultadoConsulta').innerHTML = '<div class="vacio-msg">Completa la palabra (mínimo 3 letras o números) antes de consultar.</div>';
     return;
   }
+  /* Una sola palabra en el nombre (ej. "dotaciones") es muy generica y sola
+     podria devolver medio listado. Si no viene acompanada de la ciudad, se
+     pide completar en vez de buscar. */
+  if(nombre && !nombre.includes(' ') && !ciudad){
+    $('resultadoConsulta').innerHTML = '<div class="vacio-msg">Tu palabra debe ir acompañada de una ciudad.</div>';
+    return;
+  }
 
   const encontrados = CLIENTES.filter(c=>{
     if(nombre && !normaliza(c.nombre).includes(nombre)) return false;
