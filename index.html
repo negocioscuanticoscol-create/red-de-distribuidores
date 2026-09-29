@@ -123,11 +123,12 @@
   <!-- ===== MODO CONSULTA (sin clave) ===== -->
   <div id="vConsulta">
     <div class="campos">
-      <div class="campo"><label>Nombre de la empresa</label><input id="q_nombre" placeholder="Ej: Dotaciones..." oninput="onBuscarConsulta()"></div>
-      <div class="campo"><label>NIT</label><input id="q_nit" placeholder="Ej: 900123456" oninput="onBuscarConsulta()"></div>
-      <div class="campo"><label>Ciudad</label><input id="q_ciudad" placeholder="Ej: Bogotá" oninput="onBuscarConsulta()"></div>
-      <div class="campo"><label>Celular</label><input id="q_cel" placeholder="Ej: 3101234567" oninput="onBuscarConsulta()"></div>
+      <div class="campo"><label>Nombre de la empresa</label><input id="q_nombre" placeholder="Ej: Dotaciones..." onkeydown="onEnterConsulta(event)"></div>
+      <div class="campo"><label>NIT</label><input id="q_nit" placeholder="Ej: 900123456" onkeydown="onEnterConsulta(event)"></div>
+      <div class="campo"><label>Ciudad</label><input id="q_ciudad" placeholder="Ej: Bogotá" onkeydown="onEnterConsulta(event)"></div>
+      <div class="campo"><label>Celular</label><input id="q_cel" placeholder="Ej: 3101234567" onkeydown="onEnterConsulta(event)"></div>
     </div>
+    <div class="btnfila"><button class="btn amarillo" onclick="ejecutarConsulta()">🔎 Consultar</button></div>
     <div class="resumen" id="resumenConsulta">Cargando…</div>
     <div id="resultadoConsulta"></div>
 
@@ -190,8 +191,11 @@ async function cargarClientes(){
 }
 
 /* ===================== MODO CONSULTA (publico) ===================== */
-let tConsulta=null;
-function onBuscarConsulta(){ clearTimeout(tConsulta); tConsulta=setTimeout(ejecutarConsulta,150); }
+/* A proposito NO busca mientras se escribe: si buscara letra por letra, se
+   iria mostrando pedacitos de la lista completa de clientes con cada tecla,
+   que es justo lo que este modo sin clave no debe dejar ver. Solo busca
+   cuando la persona termina de escribir (Enter) o toca "Consultar". */
+function onEnterConsulta(ev){ if(ev.key==='Enter') ejecutarConsulta(); }
 
 function ejecutarConsulta(){
   const nombre = normaliza($('q_nombre').value);
@@ -199,6 +203,13 @@ function ejecutarConsulta(){
   const ciudad = normaliza($('q_ciudad').value);
   const cel = normaliza($('q_cel').value);
   if(!nombre && !nit && !ciudad && !cel){ $('resultadoConsulta').innerHTML=''; return; }
+  /* Ninguna casilla llena con menos de 3 caracteres: evita que "a" o "1"
+     devuelvan medio listado aunque ya no se busque letra por letra. */
+  const llenas = [nombre,nit,ciudad,cel].filter(Boolean);
+  if(llenas.some(v=>v.length<3)){
+    $('resultadoConsulta').innerHTML = '<div class="vacio-msg">Completa la palabra (mínimo 3 letras o números) antes de consultar.</div>';
+    return;
+  }
 
   const encontrados = CLIENTES.filter(c=>{
     if(nombre && !normaliza(c.nombre).includes(nombre)) return false;
