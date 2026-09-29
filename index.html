@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Integra Supply · Distribuidores ya trabajados</title>
+<link rel="icon" href="logo.jpg">
+<style>
+  :root{
+    --amarillo:#FFC72C;
+    --amarillo2:#F5B700;
+    --negro:#141414;
+    --carta:#1e1e1e;
+    --carta2:#262626;
+    --linea:#3a3a3a;
+    --texto:#f2f2f2;
+    --tenue:#a3a3a3;
+    --rojo:#e0574c;
+    --verde:#2fbf71;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--negro);color:var(--texto);font-family:'Segoe UI',Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+  header{background:linear-gradient(135deg,var(--amarillo),var(--amarillo2));padding:14px 18px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+  header img{width:42px;height:42px;border-radius:8px;object-fit:cover;flex:none}
+  header h1{margin:0;font-size:16px;color:var(--negro);font-weight:800;letter-spacing:-.01em}
+  header p{margin:1px 0 0;font-size:11.5px;color:#3a2f00;font-weight:600}
+
+  main{max-width:1000px;margin:0 auto;padding:16px}
+
+  .buscador{position:relative;margin-bottom:16px}
+  .buscador input{width:100%;padding:13px 14px 13px 42px;border-radius:12px;border:1px solid var(--linea);
+    background:var(--carta);color:var(--texto);font-size:15px}
+  .buscador input::placeholder{color:var(--tenue)}
+  .buscador .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.6;pointer-events:none}
+  .buscador .limpiar{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;
+    color:var(--tenue);font-size:18px;cursor:pointer;padding:6px;display:none}
+
+  .resumen{font-size:12px;color:var(--tenue);margin-bottom:14px;text-align:center}
+  .resumen b{color:var(--amarillo)}
+
+  .mapa-wrap{background:var(--carta);border:1px solid var(--linea);border-radius:16px;padding:10px;margin-bottom:16px;overflow:hidden}
+  svg#mapa{width:100%;height:auto;display:block}
+  svg#mapa path{fill:#3a3a3a;stroke:var(--negro);stroke-width:.6;cursor:pointer;transition:fill .12s}
+  svg#mapa path:hover{fill:var(--amarillo2)}
+  svg#mapa path.activo{fill:var(--amarillo)}
+  svg#mapa path.vacio{fill:#2a2a2a;cursor:default}
+  svg#mapa path.vacio:hover{fill:#2a2a2a}
+
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px}
+  .chip{background:var(--carta);border:1px solid var(--linea);color:var(--texto);border-radius:20px;
+    padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+  .chip:hover{border-color:var(--amarillo)}
+  .chip.on{background:var(--amarillo);color:var(--negro);border-color:var(--amarillo)}
+  .chip span{opacity:.65;font-weight:700}
+  .chip.on span{opacity:.6}
+
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--amarillo);margin:22px 0 10px;
+    border-left:4px solid var(--amarillo);padding-left:9px}
+
+  .ciudades{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+  .ciudad-btn{background:var(--carta2);border:1px solid var(--linea);color:var(--texto);border-radius:10px;
+    padding:9px 12px;font-size:13px;cursor:pointer;font-weight:600}
+  .ciudad-btn:hover,.ciudad-btn.on{border-color:var(--amarillo);color:var(--amarillo)}
+  .ciudad-btn b{opacity:.6;font-weight:700;margin-left:4px}
+
+  .lista{display:flex;flex-direction:column;gap:8px}
+  .fila{background:var(--carta);border:1px solid var(--linea);border-left:4px solid var(--rojo);border-radius:11px;
+    padding:12px 14px}
+  .fila .nom{font-weight:800;font-size:14.5px;margin-bottom:4px}
+  .fila .det{font-size:12.5px;color:var(--tenue);display:flex;flex-wrap:wrap;gap:4px 14px}
+  .fila .det b{color:var(--texto);font-weight:600}
+  .etiqueta{display:inline-flex;align-items:center;gap:5px;background:rgba(224,87,76,.14);color:var(--rojo);
+    border:1px solid rgba(224,87,76,.4);border-radius:20px;padding:3px 10px;font-size:10.5px;font-weight:800;
+    letter-spacing:.03em;text-transform:uppercase;margin-bottom:6px}
+
+  .vacio-msg{text-align:center;color:var(--tenue);font-size:13.5px;padding:30px 10px}
+  .cargando{text-align:center;color:var(--tenue);font-size:13.5px;padding:40px 10px}
+  footer{text-align:center;font-size:11px;color:#5a5a5a;padding:26px 10px 34px}
+
+  @media(max-width:520px){
+    header h1{font-size:14px}
+    .fila .nom{font-size:13.5px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="logo.jpg" alt="Integra Supply">
+  <div>
+    <h1>Distribuidores ya trabajados</h1>
+    <p>Integra Supply · consulta antes de contactar</p>
+  </div>
+</header>
+
+<main>
+  <div class="buscador">
+    <span class="ico">🔎</span>
+    <input id="buscar" type="text" placeholder="Buscar por nombre, NIT o celular…" oninput="onBuscar()">
+    <button class="limpiar" id="btnLimpiar" onclick="limpiarBusqueda()">✕</button>
+  </div>
+
+  <div class="resumen" id="resumen">Cargando distribuidores…</div>
+
+  <div class="mapa-wrap">
+    <svg id="mapa" viewBox="0 0 500 500"></svg>
+  </div>
+
+  <div class="chips" id="chipsDeptos"></div>
+
+  <div id="resultado"></div>
+
+  <footer>Negocios Cuánticos · Integra Supply</footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script>
+const SB_URL = 'https://fnayedgvamxktxfvywwl.supabase.co';
+const SB_KEY = 'sb_publishable_NVTYNkJ0V6obLwgwjXza1g_3Ihp-xMv';
+
+let CLIENTES = [];        // fila cruda de la base
+let POR_DEPTO = {};       // { deptoNormalizado: { nombreLindo, ciudades: { ciudad: [clientes] } } }
+let DEPTO_ACTIVO = null;
+let CIUDAD_ACTIVA = null;
+
+function normaliza(s){
+  return (s||'').toString().normalize('NFKD').replace(/[̀-ͯ]/g,'')
+    .toUpperCase().replace(/[^A-Z0-9 ]/g,'').trim();
+}
+
+// Equivalencias entre el nombre del geojson (mayusculas, sin tilde, raro en
+// Bogota y San Andres) y el nombre que usa nuestra base de datos.
+const EQUIV_DEPTO = {
+  'SANTAFE DE BOGOTA DC': 'BOGOTA DC',
+  'ARCHIPIELAGO DE SAN ANDRES PROVIDENCIA Y SANTA CATALINA': 'SAN ANDRES',
+};
+function claveDepto(nombreCrudo){
+  const n = normaliza(nombreCrudo);
+  return EQUIV_DEPTO[n] || n;
+}
+
+async function cargarClientes(){
+  const r = await fetch(SB_URL + '/rest/v1/feroz_clientes_activos?select=*&order=depto,ciudad,nombre', {
+    headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
+  });
+  CLIENTES = await r.json();
+
+  POR_DEPTO = {};
+  CLIENTES.forEach(c=>{
+    const k = claveDepto(c.depto || 'SIN DEPARTAMENTO');
+    if(!POR_DEPTO[k]) POR_DEPTO[k] = { nombreLindo: c.depto || 'Sin departamento', ciudades: {} };
+    const ciu = c.ciudad || 'Sin ciudad';
+    if(!POR_DEPTO[k].ciudades[ciu]) POR_DEPTO[k].ciudades[ciu] = [];
+    POR_DEPTO[k].ciudades[ciu].push(c);
+  });
+
+  $('resumen').innerHTML = 'En total hay <b>'+CLIENTES.length.toLocaleString('es-CO')+'</b> distribuidores que ya trabajamos, en <b>'+Object.keys(POR_DEPTO).length+'</b> departamentos.';
+  pintarChips();
+  await pintarMapa();
+}
+
+function $(id){ return document.getElementById(id); }
+
+function pintarChips(){
+  const orden = Object.keys(POR_DEPTO).sort((a,b)=>POR_DEPTO[b].ciudades && contarDepto(b)-contarDepto(a));
+  $('chipsDeptos').innerHTML = orden.map(k=>{
+    const d = POR_DEPTO[k];
+    const n = contarDepto(k);
+    return `<button class="chip${k===DEPTO_ACTIVO?' on':''}" onclick="elegirDepto('${esc(k)}')">${esc(d.nombreLindo)} <span>${n}</span></button>`;
+  }).join('');
+}
+function contarDepto(k){
+  const d = POR_DEPTO[k]; if(!d) return 0;
+  return Object.values(d.ciudades).reduce((s,arr)=>s+arr.length,0);
+}
+function esc(s){ return String(s).replace(/'/g,"\\'"); }
+
+let projection, path;
+async function pintarMapa(){
+  const geo = await (await fetch('colombia-departamentos.json')).json();
+  projection = d3.geoMercator().fitSize([500,560], geo);
+  path = d3.geoPath(projection);
+
+  const svg = $('mapa');
+  svg.setAttribute('viewBox','0 0 500 560');
+  svg.innerHTML = geo.features.map(f=>{
+    const k = claveDepto(f.properties.nombre);
+    const n = contarDepto(k);
+    const clase = n>0 ? '' : 'vacio';
+    return `<path data-k="${esc(k)}" class="${clase}" d="${path(f)}">`
+      + `<title>${esc(f.properties.nombre)} · ${n} distribuidor(es)</title></path>`;
+  }).join('');
+
+  svg.querySelectorAll('path[data-k]').forEach(p=>{
+    p.addEventListener('click', ()=>{ if(contarDepto(p.dataset.k)>0) elegirDepto(p.dataset.k); });
+  });
+}
+
+function elegirDepto(k){
+  DEPTO_ACTIVO = k; CIUDAD_ACTIVA = null;
+  document.querySelectorAll('#mapa path').forEach(p=>p.classList.toggle('activo', p.dataset.k===k));
+  pintarChips();
+  pintarCiudades();
+}
+
+function pintarCiudades(){
+  const d = POR_DEPTO[DEPTO_ACTIVO];
+  if(!d){ $('resultado').innerHTML=''; return; }
+  const ciudades = Object.keys(d.ciudades).sort((a,b)=>d.ciudades[b].length-d.ciudades[a].length);
+  let html = `<h2>${esc(d.nombreLindo)} — elige una ciudad</h2><div class="ciudades">`;
+  html += ciudades.map(c=>`<button class="ciudad-btn${c===CIUDAD_ACTIVA?' on':''}" onclick="elegirCiudad('${esc(c)}')">${esc(c)} <b>${d.ciudades[c].length}</b></button>`).join('');
+  html += '</div><div id="listaCiudad"></div>';
+  $('resultado').innerHTML = html;
+  if(CIUDAD_ACTIVA) pintarListaCiudad();
+}
+
+function elegirCiudad(c){
+  CIUDAD_ACTIVA = c;
+  document.querySelectorAll('.ciudad-btn').forEach(b=>b.classList.toggle('on', b.textContent.trim().startsWith(c)));
+  pintarListaCiudad();
+}
+
+function pintarListaCiudad(){
+  const d = POR_DEPTO[DEPTO_ACTIVO]; if(!d) return;
+  const arr = d.ciudades[CIUDAD_ACTIVA] || [];
+  $('listaCiudad').innerHTML = filaLista(arr);
+}
+
+function filaLista(arr){
+  if(!arr.length) return '<div class="vacio-msg">No hay distribuidores aquí.</div>';
+  return '<div class="lista">' + arr.map(c=>`
+    <div class="fila">
+      <div class="etiqueta">🚫 No contactar · ya es cliente</div>
+      <div class="nom">${esc(c.nombre||'(sin nombre)')}</div>
+      <div class="det">
+        ${c.nit?`<span><b>NIT</b> ${esc(c.nit)}</span>`:''}
+        ${c.tel1?`<span><b>Tel</b> ${esc(c.tel1)}</span>`:''}
+        ${c.tel2?`<span><b>Cel 2</b> ${esc(c.tel2)}</span>`:''}
+        ${c.fijo1?`<span><b>Fijo</b> ${esc(c.fijo1)}</span>`:''}
+        <span><b>Ciudad</b> ${esc(c.ciudad||'—')}</span>
+      </div>
+    </div>`).join('') + '</div>';
+}
+
+let tBuscar=null;
+function onBuscar(){
+  clearTimeout(tBuscar);
+  tBuscar = setTimeout(ejecutarBusqueda, 120);
+}
+function limpiarBusqueda(){
+  $('buscar').value=''; ejecutarBusqueda();
+}
+const TOPE_BUSQUEDA = 60;
+function ejecutarBusqueda(){
+  const q = normaliza($('buscar').value);
+  $('btnLimpiar').style.display = q ? 'block' : 'none';
+  if(!q){
+    if(DEPTO_ACTIVO) pintarCiudades(); else $('resultado').innerHTML='';
+    return;
+  }
+  if(q.length < 3){
+    $('resultado').innerHTML = '<div class="vacio-msg">Escribe al menos 3 letras o números para buscar.</div>';
+    return;
+  }
+  const encontrados = CLIENTES.filter(c=>{
+    const nom = normaliza(c.nombre);
+    const nit = normaliza(c.nit);
+    const t1 = normaliza(c.tel1), t2 = normaliza(c.tel2), t3 = normaliza(c.fijo1);
+    return nom.includes(q) || nit.includes(q) || t1.includes(q) || t2.includes(q) || t3.includes(q);
+  });
+  const recorte = encontrados.slice(0, TOPE_BUSQUEDA);
+  const aviso = encontrados.length > TOPE_BUSQUEDA
+    ? `<div class="vacio-msg">Mostrando los primeros ${TOPE_BUSQUEDA} de ${encontrados.length} — escribe algo más específico.</div>` : '';
+  $('resultado').innerHTML = `<h2>Resultados de la búsqueda (${encontrados.length})</h2>` + aviso + filaLista(recorte);
+}
+
+cargarClientes();
+</script>
+</body>
+</html>
