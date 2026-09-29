@@ -123,10 +123,10 @@
   <!-- ===== MODO CONSULTA (sin clave) ===== -->
   <div id="vConsulta">
     <div class="campos">
-      <div class="campo"><label>Nombre de la empresa</label><input id="q_nombre" placeholder="Ej: Dotaciones..." onkeydown="onEnterConsulta(event)"></div>
-      <div class="campo"><label>NIT</label><input id="q_nit" placeholder="Ej: 900123456" onkeydown="onEnterConsulta(event)"></div>
-      <div class="campo"><label>Ciudad</label><input id="q_ciudad" placeholder="Ej: Bogotá" onkeydown="onEnterConsulta(event)"></div>
-      <div class="campo"><label>Celular</label><input id="q_cel" placeholder="Ej: 3101234567" onkeydown="onEnterConsulta(event)"></div>
+      <div class="campo"><label>Nombre de la empresa</label><input id="q_nombre" placeholder="Ej: Dotaciones..." enterkeyhint="search" onkeydown="onEnterConsulta(event)" onblur="ejecutarConsulta()"></div>
+      <div class="campo"><label>NIT</label><input id="q_nit" placeholder="Ej: 900123456" enterkeyhint="search" onkeydown="onEnterConsulta(event)" onblur="ejecutarConsulta()"></div>
+      <div class="campo"><label>Ciudad</label><input id="q_ciudad" placeholder="Ej: Bogotá" enterkeyhint="search" onkeydown="onEnterConsulta(event)" onblur="ejecutarConsulta()"></div>
+      <div class="campo"><label>Celular</label><input id="q_cel" placeholder="Ej: 3101234567" enterkeyhint="search" onkeydown="onEnterConsulta(event)" onblur="ejecutarConsulta()"></div>
     </div>
     <div class="btnfila"><button class="btn amarillo" onclick="ejecutarConsulta()">🔎 Consultar</button></div>
     <div class="resumen" id="resumenConsulta">Cargando…</div>
