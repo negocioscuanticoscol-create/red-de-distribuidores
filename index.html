@@ -99,6 +99,8 @@
     letter-spacing:.03em;text-transform:uppercase;margin-bottom:6px}
 
   .vacio-msg{text-align:center;color:var(--tenue);font-size:13.5px;padding:30px 10px}
+  .aviso-amarillo{text-align:center;color:var(--negro);background:var(--amarillo);border-radius:12px;
+    font-size:14px;font-weight:800;padding:16px 14px;margin:6px 0}
   footer{text-align:center;font-size:11px;color:#5a5a5a;padding:26px 10px 34px}
 
   @media(max-width:520px){
@@ -207,14 +209,14 @@ function ejecutarConsulta(){
      devuelvan medio listado aunque ya no se busque letra por letra. */
   const llenas = [nombre,nit,ciudad,cel].filter(Boolean);
   if(llenas.some(v=>v.length<3)){
-    $('resultadoConsulta').innerHTML = '<div class="vacio-msg">Completa la palabra (mínimo 3 letras o números) antes de consultar.</div>';
+    $('resultadoConsulta').innerHTML = '<div class="aviso-amarillo">⚠️ Completa la palabra (mínimo 3 letras o números) antes de consultar.</div>';
     return;
   }
   /* Una sola palabra en el nombre (ej. "dotaciones") es muy generica y sola
      podria devolver medio listado. Si no viene acompanada de la ciudad, se
      pide completar en vez de buscar. */
   if(nombre && !nombre.includes(' ') && !ciudad){
-    $('resultadoConsulta').innerHTML = '<div class="vacio-msg">Tu palabra debe ir acompañada de una ciudad.</div>';
+    $('resultadoConsulta').innerHTML = '<div class="aviso-amarillo">⚠️ Tu palabra debe ir acompañada de una ciudad.</div>';
     return;
   }
 
