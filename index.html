@@ -187,7 +187,6 @@ async function cargarClientes(){
   });
   CLIENTES = await r.json();
   $('resumenConsulta').innerHTML = 'Base de <b>'+CLIENTES.length.toLocaleString('es-CO')+'</b> distribuidores ya trabajados.';
-  if(sessionStorage.getItem('integra_sesion')) entrarModoCompleto(false);
 }
 
 /* ===================== MODO CONSULTA (publico) ===================== */
@@ -247,15 +246,16 @@ async function intentarLogin(){
     body: JSON.stringify({ usuario: usuario||'(vacio)', exitoso: ok }) }).catch(()=>{});
 
   if(ok){
-    sessionStorage.setItem('integra_sesion', usuario);
     entrarModoCompleto(true);
   } else {
     $('lg_err').style.display='block';
   }
 }
 
+/* A proposito NO se guarda la sesion en sessionStorage/localStorage:
+   Jose pidio que refrescar la pagina SIEMPRE vuelva a la pantalla inicial
+   y vuelva a pedir la clave, nunca quedar recordada. */
 function cerrarSesion(){
-  sessionStorage.removeItem('integra_sesion');
   location.reload();
 }
 
