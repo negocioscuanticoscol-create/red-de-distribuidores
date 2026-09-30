@@ -206,6 +206,7 @@ function normaliza(s){
 
 let CLIENTES = [];   // "actuales" (azul) — feroz_clientes_activos, publico e interno
 let EMBUDO = [];     // "interesados"/"nuevos" (amarillo/verde) — nc_crm_embudo, SOLO tras login
+let VENTAS = [];      // "nuevos" (verde) confirmados a mano por Jose desde los Pedidos de CED — integra_ventas_confirmadas
 
 async function cargarClientes(){
   const r = await fetch(SB_URL + '/rest/v1/feroz_clientes_activos?select=*&order=depto,ciudad,nombre', {
@@ -340,11 +341,25 @@ async function cargarEmbudo(){
   }catch(e){ EMBUDO = []; }
 }
 
+/* Ventas ya confirmadas a mano por Jose desde la pantalla de Pedidos de CED
+   (30-sep-2026): estas SON el verde aunque el embudo todavia no tenga a nadie
+   en la ultima etapa. Se cargan igual que el embudo, discriminadas por nombre
+   en la lista de abajo. */
+async function cargarVentas(){
+  try{
+    const r = await fetch(SB_URL + '/rest/v1/integra_ventas_confirmadas?select=nombre,ciudad,telefono,valor', {
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
+    });
+    VENTAS = await r.json();
+  }catch(e){ VENTAS = []; }
+}
+
 async function entrarModoCompleto(animar){
   $('vLogin').style.display='none'; $('vConsulta').style.display='none';
   $('vCompleto').style.display='block'; $('btnSalir').style.display='block';
 
   if(!EMBUDO.length) await cargarEmbudo();
+  if(!VENTAS.length) await cargarVentas();
 
   POR_DEPTO = {};
   /* Ciudad se agrupa por nombre NORMALIZADO (sin tildes/mayusculas) para que
@@ -374,7 +389,13 @@ async function entrarModoCompleto(animar){
     celda(k, deptoReal==='SIN DEPARTAMENTO'?'Sin departamento':deptoReal, e.ciudad || 'Sin ciudad')[grupo].push(e);
   });
 
-  const totA = CLIENTES.length, totY = EMBUDO.filter(e=>e.etapa<ETAPA_VENTA).length, totV = EMBUDO.filter(e=>e.etapa>=ETAPA_VENTA).length;
+  VENTAS.forEach(v=>{
+    const deptoReal = CIUDAD_A_DEPTO[normaliza(v.ciudad)] || 'SIN DEPARTAMENTO';
+    const k = claveDepto(deptoReal);
+    celda(k, deptoReal==='SIN DEPARTAMENTO'?'Sin departamento':deptoReal, v.ciudad || 'Sin ciudad').nuevos.push(v);
+  });
+
+  const totA = CLIENTES.length, totY = EMBUDO.filter(e=>e.etapa<ETAPA_VENTA).length, totV = EMBUDO.filter(e=>e.etapa>=ETAPA_VENTA).length + VENTAS.length;
   $('totA').textContent = totA.toLocaleString('es-CO');
   $('totY').textContent = totY.toLocaleString('es-CO');
   $('totV').textContent = totV.toLocaleString('es-CO');
@@ -526,6 +547,7 @@ function filaListaCompleta(actuales, interesados, nuevos){
       <div class="det">
         ${e.telefono?`<span><b>Tel</b> ${esc(e.telefono)}</span>`:''}
         <span><b>Ciudad</b> ${esc(e.ciudad||'—')}</span>
+        ${e.valor?`<span><b>Comprado</b> $${Number(e.valor).toLocaleString('es-CO')}</span>`:''}
       </div>
     </div>`; });
   return html + '</div>';
@@ -547,7 +569,8 @@ function ejecutarBusqueda(){
     return nom.includes(q) || nit.includes(q) || t1.includes(q) || t2.includes(q) || t3.includes(q);
   });
   const interesados = EMBUDO.filter(e=>e.etapa<ETAPA_VENTA && (normaliza(e.nombre).includes(q) || normaliza(e.telefono).includes(q)));
-  const nuevos = EMBUDO.filter(e=>e.etapa>=ETAPA_VENTA && (normaliza(e.nombre).includes(q) || normaliza(e.telefono).includes(q)));
+  const nuevos = EMBUDO.filter(e=>e.etapa>=ETAPA_VENTA && (normaliza(e.nombre).includes(q) || normaliza(e.telefono).includes(q)))
+    .concat(VENTAS.filter(v=>normaliza(v.nombre).includes(q) || normaliza(v.telefono).includes(q)));
 
   const total = actuales.length + interesados.length + nuevos.length;
   const recA = actuales.slice(0, TOPE_BUSQUEDA);
